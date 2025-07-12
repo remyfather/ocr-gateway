@@ -9,8 +9,13 @@ echo "1. 서버 헬스체크..."
 curl -X GET http://localhost:8080/api/v2/ocr/health
 echo -e "\n"
 
+# 큐 상태 확인
+echo "2. 큐 상태 확인..."
+curl -X GET http://localhost:8080/api/v2/ocr/queues/status
+echo -e "\n"
+
 # OCR 요청 테스트
-echo "2. OCR 요청 테스트..."
+echo "3. OCR 요청 테스트..."
 curl -X POST http://localhost:8080/api/v2/ocr/process \
   -H "Content-Type: application/json" \
   -d '{
