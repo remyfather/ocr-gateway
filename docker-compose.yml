@@ -1,0 +1,32 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: ocrdb
+      MYSQL_USER: ocruser
+      MYSQL_PASSWORD: ocrpass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3307:3306"
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_ERLANG_COOKIE: SWQOKODSQALRPCLNMEQG
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_logs:/var/log/rabbitmq
+    restart: always
+
+volumes:
+  mysql_data:
+  rabbitmq_data:
+  rabbitmq_logs:

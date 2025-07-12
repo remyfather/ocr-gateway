@@ -1,0 +1,119 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: ocrdb
+      MYSQL_USER: ocruser
+      MYSQL_PASSWORD: ocrpass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3307:3306"
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
+      
+  # RabbitMQ 클러스터 - 노드 1 (마스터)
+  rabbitmq-node1:
+    image: rabbitmq:3-management
+    hostname: rabbitmq-node1
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_ERLANG_COOKIE: SWQOKODSQALRPCLNMEQG
+      RABBITMQ_USE_LONGNAME: true
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_node1_data:/var/lib/rabbitmq
+      - rabbitmq_node1_logs:/var/log/rabbitmq
+    restart: always
+    networks:
+      - rabbitmq_cluster
+
+  # RabbitMQ 클러스터 - 노드 2
+  rabbitmq-node2:
+    image: rabbitmq:3-management
+    hostname: rabbitmq-node2
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_ERLANG_COOKIE: SWQOKODSQALRPCLNMEQG
+      RABBITMQ_USE_LONGNAME: true
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    volumes:
+      - rabbitmq_node2_data:/var/lib/rabbitmq
+      - rabbitmq_node2_logs:/var/log/rabbitmq
+    restart: always
+    depends_on:
+      - rabbitmq-node1
+    networks:
+      - rabbitmq_cluster
+    command: >
+      bash -c "
+        sleep 10 &&
+        rabbitmqctl stop_app &&
+        rabbitmqctl reset &&
+        rabbitmqctl join_cluster rabbit@rabbitmq-node1 &&
+        rabbitmqctl start_app
+      "
+
+  # RabbitMQ 클러스터 - 노드 3
+  rabbitmq-node3:
+    image: rabbitmq:3-management
+    hostname: rabbitmq-node3
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_ERLANG_COOKIE: SWQOKODSQALRPCLNMEQG
+      RABBITMQ_USE_LONGNAME: true
+    ports:
+      - "5674:5672"
+      - "15674:15672"
+    volumes:
+      - rabbitmq_node3_data:/var/lib/rabbitmq
+      - rabbitmq_node3_logs:/var/log/rabbitmq
+    restart: always
+    depends_on:
+      - rabbitmq-node1
+    networks:
+      - rabbitmq_cluster
+    command: >
+      bash -c "
+        sleep 15 &&
+        rabbitmqctl stop_app &&
+        rabbitmqctl reset &&
+        rabbitmqctl join_cluster rabbit@rabbitmq-node1 &&
+        rabbitmqctl start_app
+      "
+
+  # HAProxy (로드 밸런서)
+  haproxy:
+    image: haproxy:latest
+    ports:
+      - "5671:5671"
+      - "15671:15671"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - rabbitmq-node1
+      - rabbitmq-node2
+      - rabbitmq-node3
+    networks:
+      - rabbitmq_cluster
+
+volumes:
+  mysql_data:
+  rabbitmq_node1_data:
+  rabbitmq_node1_logs:
+  rabbitmq_node2_data:
+  rabbitmq_node2_logs:
+  rabbitmq_node3_data:
+  rabbitmq_node3_logs:
+
+networks:
+  rabbitmq_cluster:
+    driver: bridge 
