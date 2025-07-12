@@ -22,31 +22,18 @@ public class DocumentClassificationService {
 
     /**
      * 단일 파일의 문서 타입을 분류합니다.
+     * 이제 파일에 직접 지정된 documentType을 사용합니다.
      */
     public DocumentClassificationResult classifyDocument(FileInfo fileInfo) {
-        String fileName = fileInfo.getFileName().toLowerCase();
+        // 파일에 직접 지정된 documentType 사용
+        DocumentType documentType = fileInfo.getDocumentType();
 
-        // 파일명 패턴을 기반으로 문서 타입 분류
-        if (containsAny(fileName, "진료비", "영수증", "receipt", "medical_fee")) {
-            return new DocumentClassificationResult(fileInfo, DocumentType.MEDICAL_RECEIPT, 0.9);
-        } else if (containsAny(fileName, "진단서", "certificate", "diagnosis")) {
-            return new DocumentClassificationResult(fileInfo, DocumentType.MEDICAL_CERTIFICATE, 0.9);
-        } else if (containsAny(fileName, "입퇴원", "입원", "퇴원", "admission", "discharge")) {
-            return new DocumentClassificationResult(fileInfo, DocumentType.ADMISSION_DISCHARGE, 0.9);
-        } else if (containsAny(fileName, "수술", "surgery", "operation")) {
-            return new DocumentClassificationResult(fileInfo, DocumentType.SURGERY_CONFIRMATION, 0.9);
-        } else {
-            // 기본값으로 진료비 영수증으로 분류
+        if (documentType == null) {
+            // documentType이 지정되지 않은 경우 기본값 사용
             return new DocumentClassificationResult(fileInfo, DocumentType.MEDICAL_RECEIPT, 0.5);
         }
-    }
 
-    private boolean containsAny(String text, String... keywords) {
-        for (String keyword : keywords) {
-            if (text.contains(keyword.toLowerCase())) {
-                return true;
-            }
-        }
-        return false;
+        // 지정된 documentType 사용 (신뢰도 1.0)
+        return new DocumentClassificationResult(fileInfo, documentType, 1.0);
     }
 }

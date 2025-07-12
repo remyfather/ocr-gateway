@@ -46,12 +46,14 @@ POST /api/v2/ocr/process
     {
       "fileName": "진료비영수증_001.pdf",
       "fileId": "FILE001",
-      "filePath": "/path/to/file1.pdf"
+      "filePath": "/path/to/file1.pdf",
+      "documentType": "MEDICAL_RECEIPT"
     },
     {
       "fileName": "진단서_001.pdf",
       "fileId": "FILE002",
-      "filePath": "/path/to/file2.pdf"
+      "filePath": "/path/to/file2.pdf",
+      "documentType": "MEDICAL_CERTIFICATE"
     }
   ]
 }
@@ -82,13 +84,18 @@ GET /api/v2/ocr/health
 
 ## 문서 분류 로직
 
-파일명을 기반으로 문서 타입을 분류합니다:
+각 파일에 직접 지정된 `documentType`을 사용하여 분류합니다:
 
-- **진료비 영수증**: "진료비", "영수증", "receipt", "medical_fee" 포함
-- **진단서**: "진단서", "certificate", "diagnosis" 포함
-- **입퇴원 확인서**: "입퇴원", "입원", "퇴원", "admission", "discharge" 포함
-- **수술확인서**: "수술", "surgery", "operation" 포함
-- **기본값**: 분류되지 않는 파일은 진료비 영수증으로 분류
+- **MEDICAL_RECEIPT**: 진료비 영수증
+- **MEDICAL_CERTIFICATE**: 진단서
+- **ADMISSION_DISCHARGE**: 입퇴원 확인서
+- **SURGERY_CONFIRMATION**: 수술확인서
+
+**장점:**
+
+- 파일명에 의존하지 않아 정확한 분류 가능
+- 신뢰도 1.0으로 높은 정확성
+- 명시적인 문서 타입 지정으로 오류 방지
 
 ## 테스트
 

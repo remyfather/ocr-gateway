@@ -95,6 +95,9 @@ public class NewOcrService {
             if (file.getFileId() == null || file.getFileId().trim().isEmpty()) {
                 throw new IllegalArgumentException("파일ID는 필수입니다. (인덱스: " + i + ")");
             }
+            if (file.getDocumentType() == null) {
+                throw new IllegalArgumentException("문서 타입은 필수입니다. (인덱스: " + i + ")");
+            }
         }
     }
 }
