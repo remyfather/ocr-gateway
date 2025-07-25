@@ -1,0 +1,35 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: preprocessing-service
+
+# 파일 전처리 설정
+preprocessing:
+  # 이미지 처리 설정
+  image:
+    target-dpi: 150
+    jpeg-quality: 0.95
+    output-format: jpeg
+    max-width: 2000
+    max-height: 2000
+
+  # PDF 처리 설정
+  pdf:
+    default-dpi: 150
+    output-format: jpeg
+
+  # 파일 경로 설정
+  paths:
+    input-base: /Users/yongho/Desktop/upstage/02. 메리츠화재(AIOCR)/gateway/nas/input
+    output-base: /Users/yongho/Desktop/upstage/02. 메리츠화재(AIOCR)/gateway/nas/processed
+    temp-base: /Users/yongho/Desktop/upstage/02. 메리츠화재(AIOCR)/gateway/temp/processing
+
+# 로깅 설정
+logging:
+  level:
+    ai.upstage.gateway.preprocessing: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
